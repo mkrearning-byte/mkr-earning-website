@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('./user'); // <--- Sahi path, kyunki user.js root folder mein hai
+const User = require('./user.js'); // .js extension zaroor lagayein // <--- Sahi path, kyunki user.js root folder mein hai
 
 const router = express.Router();
 
@@ -257,3 +257,4 @@ router.post('/redeem', authMiddleware, async (req, res) => {
 
 
 module.exports = router;
+
