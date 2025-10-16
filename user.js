@@ -1,4 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); 
+const bcrypt = require('bcryptjs'); // <--- 
+const bcrypt = require('bcryptjs'); // <--- Agar ye missing hai toh bhi crash hoga
 const bcrypt = require('bcryptjs'); // Zaroori: Password hashing ke liye
 
 const userSchema = new mongoose.Schema({
@@ -143,3 +145,4 @@ userSchema.pre('save', async function (next) {
 // Final line to export the model
 const User = mongoose.model('User', userSchema);
 module.exports = User;
+
