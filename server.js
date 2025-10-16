@@ -34,7 +34,7 @@ app.use('/api', mkrRoutes);
 // --- Serve Frontend (index.html) ---
 // Frontend file ko static folder se serve karein, ya seedhe index.html ko root par serve karein
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(process.cwd(),'index.html'));
 });
 
 // --- 404 Handler ---
@@ -50,3 +50,4 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(Server running on port ${PORT}));
+
