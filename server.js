@@ -33,8 +33,10 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 
 // === Import Routes ===
+const mkrRoutes = require('./routes/mkr');
 // === Use Routes ===
 // === Serve Frontend (index.html) ===
+app.use('/api', mkrRoutes);
 // Frontend file ko static folder se serve karein, ya seedhe index.html ko root par serve karein
 app.get('/', (req, res) => {
     // FIX for Vercel: process.cwd() is used to resolve the file path correctly
@@ -63,4 +65,5 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
 
