@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User =require('./user');
+const User = require('./user'); // <--- PATH FIXED: user.js ko root se import kar raha hai
 
 const router = express.Router();
 
@@ -49,5 +49,31 @@ const resetDailyAdCount = (user) => {
 // ============================================
 // ROUTE 1: Signup
 // ============================================
-router.post
+router.post('/signup', async (req, res) => {
+    // Yahan signup ka poora code aayega. 
+    // Example:
+    try {
+        const { phoneNumber, password, referredBy } = req.body;
+        
+        // 1. Check if user already exists
+        let user = await User.findOne({ phoneNumber });
+        if (user) {
+            return res.status(400).json({ success: false, message: 'User already exists' });
+        }
+        
+        // 2. Create new user (password hashing is done in user.js pre-save hook)
+        user = new User({ phoneNumber, password, referredBy });
+        await user.save();
 
+        // 3. Send success response
+        res.status(201).json({ success: true, message: 'User registered successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error during signup' });
+    }
+});
+// ********************************************
+// NOTE: Iske neeche aur baaki routes ka code bhi daal dein.
+// ********************************************
+
+module.exports = router;
