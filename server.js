@@ -33,11 +33,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 
 // === Import Routes ===
-const mkrRoutes = require('./routes/mkr'); 
-
 // === Use Routes ===
-app.use('/api', mkrRoutes);
-
 // === Serve Frontend (index.html) ===
 // Frontend file ko static folder se serve karein, ya seedhe index.html ko root par serve karein
 app.get('/', (req, res) => {
@@ -67,3 +63,4 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
