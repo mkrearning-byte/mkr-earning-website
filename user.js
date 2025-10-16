@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs'); // <--- Zaroori: bcrypt import kiya gaya hai
 
 const userSchema = new mongoose.Schema({
   phoneNumber: {
@@ -72,7 +73,7 @@ const userSchema = new mongoose.Schema({
     default: false
   },
   // Redeem Limits for ₹300 (Max 1 time)
-  redeem300Count: {
+    redeem300Count: {
     type: Number,
     default: 0,
     min: 0,
@@ -127,5 +128,22 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save middleware to set myReferralCode (use phone number as referral code)
-userSchema.pre('save', func
+// Pre-save middleware (Password Hash and Referral Code Set)
+userSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) {
+        return next();
+    }
+    // Password hash
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    
+    // Set myReferralCode to phone number if it's new
+    if (this.isNew) {
+        this.myReferralCode = this.phoneNumber;
+    }
+    next();
+});
+
+// Final line to export the model
+const User = mongoose.model('User', userSchema);
+module.exports = User;
