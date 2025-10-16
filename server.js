@@ -1,65 +1,75 @@
-// server.js - Node.js Server Engine
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs'); // <--- Zaroori hai index.html check karne ke liye
 
-// Load environment variables from .env file
-dotenv.config();
+// Environment variables ko .env file se load karein (local development ke liye)
+// Vercel par process.env variables use hote hain, .env file ignore hoti hai.
+// isliye, Vercel par yeh line koi asar nahi karegi.
+require('dotenv').config();
 
-// Initialize Express app
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors()); // Enable CORS for all routes (important for frontend testing)
-app.use(express.json());
+// ============================================
+// Middleware Setup
+// ============================================
+app.use(cors()); // CORS enable kiya
+app.use(express.json()); // JSON request bodies ko parse karne ke liye
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files (HTML, CSS, JS) - FIX for Vercel
-// Vercel par __dirname ki jagah process.cwd() use karein
-app.use(express.static(path.join(process.cwd(), ''))); // <-- Root folder ko static serve kiya
-
-// === MongoDB Connection ===
+// ============================================
+// MongoDB Connection
+// ============================================
 mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true, // Deprecated in Mongoose 6+
-    useUnifiedTopology: true, // Deprecated in Mongoose 6+
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
     // Note: useCreateIndex and useFindAndModify are deprecated and removed in Mongoose 6+
 })
 .then(() => console.log('MongoDB Connected Successfully!'))
 .catch(err => console.error('MongoDB Connection Error:', err));
 
+// ============================================
+// Static Files Serving
+// ============================================
+// Static files (CSS, JS, images, index.html) ko serve karne ke liye.
+// Vercel par __dirname ki jagah process.cwd() use kiya hai.
+app.use(express.static(path.join(process.cwd())));
 
-// === Import Routes ===
-const mkrRoutes = require('./mkr'); // <--- PATH FIXED: mkr.js ko root se import kiya
-// --------------------
+// ============================================
+// Import & Use Routes
+// ============================================
+const mkrRoutes = require('./mkr'); // <--- Routes ko root folder se import kiya
+app.use('/api', mkrRoutes); // Sabhi routes ko '/api' prefix par mount kiya
 
-// === Use Routes ===
-app.use('/api', mkrRoutes);
-// ------------------
-
-
-// === Serve Frontend (index.html) ===
-// Frontend file ko static folder se serve karein, ya seedhe index.html ko root par serve karein
+// ============================================
+// Serve Frontend (index.html) - Final Fix for Vercel Crash
+// ============================================
+// Root URL ('/') par seedhe index.html ko serve karein.
 app.get('/', (req, res) => {
-    // FIX for Vercel: process.cwd() is used to resolve the file path correctly
-    res.sendFile(path.join(process.cwd(), 'index.html'));
-});
-// -----------------------------------
-
-
-// 404 Handler
-app.use((req, res, next) => {
-    res.status(404).json({ success: false, message: 'Route not found' });
-});
-
-// Global Error Handling Middleware (agar koi unhandled error aaye)
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    // Vercel environment mein path resolve karne ka safe tareeka
+    const filePath = path.join(process.cwd(), 'index.html');
+    
+    // Crash se bachne ke liye file ki availability check karein
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        // Agar file nahi mili, toh server crash nahi hoga, bas yeh message dega
+        res.status(404).send("MKR Earning Website: Index.html not found.");
+    }
 });
 
+// ============================================
+// Server Listen (Vercel par yeh run nahi hota)
+// ============================================
+// Yeh block Vercel deployment ke liye zaroori nahi hai,
+// lekin local testing ke liye accha hai.
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(Server is running on port ${PORT});
+    });
+}
 
-// Server Listening
-const PORT = process.env.PORT || 8080; // Vercel apne aap PORT provide karega
-app.listen(PORT, () => console.log(`Server running on port ${PORT}!`));
+// Vercel serverless function ko export karein
+module.exports = app;
