@@ -33,7 +33,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 
 // === Import Routes ===
-const mkrRoutes = require('./routes/mkr');
+const mkrRoutes = require('./mkr.js');
 // === Use Routes ===
 // === Serve Frontend (index.html) ===
 app.use('/api', mkrRoutes);
@@ -65,5 +65,6 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
 
 
