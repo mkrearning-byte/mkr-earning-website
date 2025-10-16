@@ -1,9 +1,10 @@
-// server.js - Node.js Server Engine
+// server.js - Final Vercel Fix
+
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const cors = require('cors');
 const path = require('path');
-const cors = require('cors'); // Ensure CORS is installed: npm install cors
 
 // Load environment variables from .env file
 dotenv.config();
@@ -16,7 +17,12 @@ app.use(cors()); // Enable CORS for all routes (important for frontend testing)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB Connection
+// Serve static files (HTML, CSS, JS) - FIX for Vercel
+// Vercel par __dirname ki jagah process.cwd() use karein
+app.use(express.static(path.join(process.cwd()))); 
+
+
+// === MongoDB Connection ===
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -25,29 +31,39 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('MongoDB Connected Successfully!'))
 .catch(err => console.error('MongoDB Connection Error:', err));
 
-// --- Import Routes ---
-const mkrRoutes = require('./routes/mkr');
 
-// Use Routes
+// === Import Routes ===
+const mkrRoutes = require('./routes/mkr'); 
+
+// === Use Routes ===
 app.use('/api', mkrRoutes);
 
-// --- Serve Frontend (index.html) ---
+// === Serve Frontend (index.html) ===
 // Frontend file ko static folder se serve karein, ya seedhe index.html ko root par serve karein
 app.get('/', (req, res) => {
-    res.sendFile(path.join(process.cwd(),'index.html'));
+    // FIX for Vercel: process.cwd() is used to resolve the file path correctly
+    res.sendFile(path.join(process.cwd(), 'index.html'));
 });
 
-// --- 404 Handler ---
+
+// === 404 Handler ===
 app.use((req, res, next) => {
     res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-// --- Global Error Handling Middleware ---
+// === Global Error Handling Middleware ===
 app.use((err, req, res, next) => {
-    console.error('X Server Error:', err.stack);
-    res.status(500).json({ success: false, message: 'Something broke!' });
+    console.error('Server Error:', err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'Internal Server Error'
+    });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(Server running on port ${PORT}));
+// Define the PORT
+const PORT = process.env.PORT || 8080;
 
+// Listen to the specified PORT
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
