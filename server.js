@@ -40,7 +40,7 @@ app.use(express.static(path.join(process.cwd())));
 // ============================================
 // Import & Use Routes
 // ============================================
-const mkrRoutes = require('./mkr'); // <--- Routes ko root folder se import kiya
+const mkrRoutes = require('./mkr.js'); // .js extension zaroor lagayein // <--- Routes ko root folder se import kiya
 app.use('/api', mkrRoutes); // Sabhi routes ko '/api' prefix par mount kiya
 
 // ============================================
@@ -73,3 +73,4 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Vercel serverless function ko export karein
 module.exports = app;
+
