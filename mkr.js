@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User =require('./user');
 
 const router = express.Router();
 
@@ -50,3 +50,4 @@ const resetDailyAdCount = (user) => {
 // ROUTE 1: Signup
 // ============================================
 router.post
+
