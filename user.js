@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs'); // <--- Zaroori: bcrypt import kiya gaya hai
+const bcrypt = require('bcryptjs'); // Zaroori: Password hashing ke liye
 
 const userSchema = new mongoose.Schema({
   phoneNumber: {
@@ -37,7 +37,6 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
-  // Referral Bonus Tracking
   referralBonusReceived: {
     type: Boolean,
     default: false
@@ -50,7 +49,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // Redeem Limits for ₹100 (Max 2 times)
   redeem100Count: {
     type: Number,
     default: 0,
@@ -61,7 +59,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // Redeem Limits for ₹200 (Max 1 time)
   redeem200Count: {
     type: Number,
     default: 0,
@@ -72,8 +69,7 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // Redeem Limits for ₹300 (Max 1 time)
-    redeem300Count: {
+  redeem300Count: {
     type: Number,
     default: 0,
     min: 0,
@@ -83,7 +79,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // Redeem History
   redeemHistory: [{
     amount: {
       type: Number,
@@ -103,7 +98,6 @@ const userSchema = new mongoose.Schema({
       default: 'pending'
     }
   }],
-  // Total Earnings Tracking
   totalEarningsAllTime: {
     type: Number,
     default: 0
@@ -130,9 +124,11 @@ const userSchema = new mongoose.Schema({
 
 // Pre-save middleware (Password Hash and Referral Code Set)
 userSchema.pre('save', async function (next) {
+    // Agar password modify nahi hua hai, toh next chala do
     if (!this.isModified('password')) {
         return next();
     }
+    
     // Password hash
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
